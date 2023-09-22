@@ -1,5 +1,5 @@
-mod web_server_test;
+mod get_device_unique_id;
 
 fn main() {
-    web_server_test::test();
+    get_device_unique_id::test();
 }

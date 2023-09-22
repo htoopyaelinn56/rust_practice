@@ -7,3 +7,5 @@ edition = "2021"
 
 [dependencies]
 sysinfo = "0.29.7"
+machine-id = "0.4.0"
+machineid-rs = "1.2.4"
