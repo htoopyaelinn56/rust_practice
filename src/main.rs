@@ -1,5 +1,6 @@
 mod get_device_unique_id;
+mod thread_test;
 
 fn main() {
-    get_device_unique_id::test();
+    thread_test::message_passing();
 }

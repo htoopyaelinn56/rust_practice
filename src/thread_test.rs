@@ -1,7 +1,7 @@
 use std::{
     rc::Rc,
     sync::{mpsc, Arc, Mutex},
-    thread,
+    thread::{self, JoinHandle},
     time::Duration,
 };
 
@@ -118,4 +118,55 @@ pub fn mutex_multi_thread_test() {
     }
 
     println!("Result: {}", *counter.lock().unwrap());
+}
+
+//only one mutation at a time with Arc
+pub fn modifying_state_concurrently() {
+    let value: Arc<Mutex<i32>> = Arc::new(Mutex::new(0));
+
+    let thread_one: JoinHandle<()>;
+    let thread_two: JoinHandle<()>;
+
+    let cloned_value_one = Arc::clone(&value);
+    let cloned_value_two = Arc::clone(&value);
+
+    //transaction one
+    thread_one = thread::spawn(move || {
+        let mut v = cloned_value_one.lock().unwrap();
+        *v += 1;
+        println!("transaction in thread one {}", *v);
+    });
+
+    //transaction two
+    thread_two = thread::spawn(move || {
+        let mut v = cloned_value_two.lock().unwrap();
+        *v += 1;
+        println!("transaction in thread two {}", *v);
+    });
+
+    thread_one.join().unwrap();
+    thread_two.join().unwrap();
+
+    println!("Result: {}", *value.lock().unwrap());
+}
+
+//doing heavy task at other thread
+pub fn message_passing() {
+    let (tx, rx) = mpsc::channel::<String>();
+
+    thread::spawn(move || {
+        let mut v: i64 = 0;
+        //heavy calculate
+        for i in 1..1000 {
+            for j in 1..1000 {
+                v += i * j;
+            }
+        }
+
+        tx.send(v.to_string())
+    });
+
+    let result = rx.recv().unwrap();
+
+    println!("Received {}", result);
 }
